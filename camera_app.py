@@ -3,7 +3,6 @@ import cv2
 import time
 import threading
 import numpy as np
-import matplotlib.pyplot as plt
 from random import randint
 from functools import partial
 from PyQt5.QtGui import QImage, QPixmap
