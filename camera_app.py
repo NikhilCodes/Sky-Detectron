@@ -22,7 +22,7 @@ def generate_masked_img(img, k=5, erode_iter=2):
     img = cv2.resize(img, (512, 512)) / 255
     masked_img = sky_masking_model.predict(np.array([img]))[0].T[0].T
     
-    blurred = cv2.GaussianBlur(masked_img, (15, 15), 0) ** k
+    blurred = cv2.GaussianBlur(masked_img, (25, 25), 0) ** k
     
     thresh = cv2.threshold(blurred*255, 60, 60, cv2.THRESH_BINARY)[1]
 
