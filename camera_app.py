@@ -15,14 +15,15 @@ Ui_MainWindow, QtBaseClass = uic.loadUiType('UI/VisualUI.ui')
 sky_masking_model = load_model("model_dir/model.h5")
 
 
-def generate_masked_img(img, k=5, erode_iter=2):
+def generate_masked_img(img, k=5, erode_iter=4):
     """
     k: de-noising factor
     """
+
     img = cv2.resize(img, (512, 512)) / 255
     masked_img = sky_masking_model.predict(np.array([img]))[0].T[0].T
     
-    blurred = cv2.GaussianBlur(masked_img, (25, 25), 0) ** k
+    blurred = cv2.GaussianBlur(masked_img, (11, 11), 0) ** k
     
     thresh = cv2.threshold(blurred*255, 60, 60, cv2.THRESH_BINARY)[1]
 
@@ -150,15 +151,17 @@ class MyApp(QMainWindow):
         self.ui.frame_display.setPixmap(pixmap_image)
 
     def load_local(self):
+        self.camera.release()
         self.pause_cam()
-        fileName, _ = QFileDialog.getOpenFileName(self, "Select Image File", "","All Picture Files (*.jpg *.png *jpeg *.tif)")
-        if fileName == '':
+        file_name, _ = QFileDialog.getOpenFileName(self, "Select Image File", "",
+                                                  "All Picture Files (*.jpg *.png *jpeg *.tif)")
+        if file_name == '':
             if self.MODE == "CAM":
                 self.start_cam()
             return
 
         self.MODE = "LOC"
-        self.frame = cv2.resize(cv2.cvtColor(cv2.imread(fileName), cv2.COLOR_BGR2RGB), (self.WIDTH, self.HEIGHT))
+        self.frame = cv2.resize(cv2.cvtColor(cv2.imread(file_name), cv2.COLOR_BGR2RGB), (self.WIDTH, self.HEIGHT))
         self.display_mat_frame(self.frame)
         self.ui.detectButton.setText("DETECT\n")
 
@@ -174,6 +177,7 @@ class MyApp(QMainWindow):
 
     def start_cam(self):
         self.MODE = "CAM"
+        self.camera = cv2.VideoCapture(0)
         self.RUN_FRAMES_FROM_CAMERA = True
 
 
