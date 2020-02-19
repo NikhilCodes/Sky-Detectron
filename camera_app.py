@@ -15,18 +15,17 @@ Ui_MainWindow, QtBaseClass = uic.loadUiType('UI/VisualUI.ui')
 sky_masking_model = load_model("model_dir/model.h5")
 
 
-def generate_masked_img(img, k=5, erode_iter=4):
+def generate_masked_img(img, k=5, erode_iter=2):
     """
     k: de-noising factor
     """
     img = cv2.resize(img, (512, 512)) / 255
     masked_img = sky_masking_model.predict(np.array([img]))[0].T[0].T
     
-    blurred = cv2.GaussianBlur(masked_img, (11, 11), 0) ** k
+    blurred = cv2.GaussianBlur(masked_img, (15, 15), 0) ** k
     
-    thresh = cv2.threshold(blurred*255, 100, 142, cv2.THRESH_BINARY)[1]
+    thresh = cv2.threshold(blurred*255, 60, 60, cv2.THRESH_BINARY)[1]
 
-    print(thresh.shape)
     # perform a series of erosion to remove
     # any small blobs of noise from the threshold image
     thresh = cv2.erode(thresh, None, iterations=erode_iter)
@@ -140,7 +139,6 @@ class MyApp(QMainWindow):
                     self.display_mat_frame(self.frame)
 
     def display_mat_frame(self, mat_src, mode='rgb'):
-        print('>>', mat_src.shape)
         height, width = mat_src.shape[:2]
         channels = 3
 
